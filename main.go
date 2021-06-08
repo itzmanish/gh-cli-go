@@ -15,8 +15,16 @@ limitations under the License.
 */
 package main
 
-import "github.com/itzmanish/gh-cli-go/cmd"
+import (
+	"log"
+	"os"
+
+	"github.com/itzmanish/gh-cli-go/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	err := cmd.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

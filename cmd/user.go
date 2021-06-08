@@ -16,109 +16,63 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/itzmanish/gh-cli-go/internal/user"
-	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
+	"github.com/itzmanish/gh-cli-go/internal"
+	"github.com/itzmanish/gh-cli-go/internal/client"
+	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
-var username string
-var accessToken string
-
 // userCmd represents the user command
-var userCmd = &cobra.Command{
-	Use:   "user",
-	Short: "For user specific commands",
-	Long:  "You must generated access token for your account with resource permission which you need to access and download.",
-	Run: func(cmd *cobra.Command, args []string) {
-		if value, err := cmd.Flags().GetBool("info"); err == nil && value {
-			err := user.Execute(cmd, args)
-			if err != nil {
-				log.Println(err)
-			}
-			return
+var userCmd = &cli.Command{
+	Name:  "user",
+	Usage: "user specific commands",
+	Flags: defaultFlags,
+	Before: func(c *cli.Context) error {
+		base_dir, err := os.UserHomeDir()
+		if err != nil {
+			return err
 		}
-		cmd.Help()
+		internal.LoadConfig(base_dir + "/.config")
+		username := viper.Get("gh_username")
+		token := viper.Get("gh_token")
+		if username == nil || token == nil {
+			return errors.New("Please initialize cli with gh-cli-go init")
+		}
+		return nil
+	},
+	Action: func(c *cli.Context) error {
+		return UserExecute(c)
 	},
 }
 
-var userInit = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize user with username and access token",
-	Run: func(cmd *cobra.Command, args []string) {
-		username, err := promptUsername()
+func UserExecute(c *cli.Context) error {
+	switch c.Args().Get(0) {
+	case "followers":
+		res, err := client.NewRequest(client.FollowersURL)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
-		password, err := promptPassword()
+		fmt.Println(string(res))
+	case "following":
+		res, err := client.NewRequest(client.FollowingURL)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
-		f, err := os.Create(".gh-cli.json")
+		fmt.Println(string(res))
+	case "":
+		res, err := client.NewRequest(client.CurrentUserURL)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
-		defer f.Close()
-		c := user.Config{
-			Username: username,
-			Token:    password,
-		}
-		err = json.NewEncoder(f).Encode(c)
-		if err != nil {
-			log.Println(err)
-		}
-		fmt.Println("gh-cli successfully initialized.")
-	},
-}
+		fmt.Println(string(res))
 
-func init() {
-	rootCmd.AddCommand(userCmd)
-	userCmd.AddCommand(userInit)
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// userCmd.PersistentFlags().StringP("username", "u", "", "github username")
-	// userCmd.PersistentFlags().StringP("token", "t", "", "github access token")
-	// userCmd.MarkPersistentFlagRequired("username")
-	// userCmd.MarkPersistentFlagRequired("token")
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	userCmd.Flags().BoolP("info", "i", false, "Show user info")
-}
-
-func promptUsername() (string, error) {
-	usernameValidate :=
-		func(input string) error {
-			return validation.Validate(input,
-				validation.Required, // not empty
-			)
-		}
-
-	userNamePrompt := promptui.Prompt{
-		Label:    "Username",
-		Validate: usernameValidate,
+	default:
+		cli.ShowAppHelp(c)
 	}
 
-	return userNamePrompt.Run()
-}
-
-func promptPassword() (string, error) {
-	passwordValidate :=
-		func(input string) error {
-			return validation.Validate(input,
-				validation.Required, // not empty
-			)
-		}
-
-	passwordPrompt := promptui.Prompt{
-		Label:    "Password",
-		Validate: passwordValidate,
-	}
-	return passwordPrompt.Run()
+	return nil
 }

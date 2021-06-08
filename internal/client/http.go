@@ -17,8 +17,13 @@ limitations under the License.
 package client
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 var Client = http.DefaultClient
@@ -28,4 +33,29 @@ func NewClient(timeout time.Duration) *http.Client {
 		Timeout: timeout,
 	}
 	return Client
+}
+
+func NewRequest(url string) ([]byte, error) {
+	username := viper.Get("gh_username")
+	token := viper.Get("gh_token")
+	httpClient := NewClient(5 * time.Second)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(username.(string), token.(string))
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	resBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	dst := &bytes.Buffer{}
+	if err := json.Indent(dst, resBody, "", "  "); err != nil {
+		return nil, err
+	}
+	return dst.Bytes(), nil
+
 }

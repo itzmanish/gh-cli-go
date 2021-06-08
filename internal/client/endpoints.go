@@ -22,31 +22,13 @@ var API_BASE_URL = "https://api.github.com"
 
 var (
 	CurrentUserURL    = API_BASE_URL + "/user"
-	AuthorizationsURL = func() string {
-		return fmt.Sprintf(API_BASE_URL + "/authorizations")
-
-	}
-	EmailsURL = func() string {
-		return fmt.Sprintf("/user/emails")
-
-	}
-	FollowersURL = func() string {
-		return fmt.Sprintf("/user/followers")
-
-	}
-	FollowingURL = func() string {
-		return fmt.Sprintf("/user/following{/target}")
-
-	}
-	GistsURL = func() string {
-		return fmt.Sprintf("/gists{/gist_id}")
-
-	}
-	PublicGistsURL = func() string {
-		return fmt.Sprintf("/gists/public")
-
-	}
-	OrganizationURL = func() string {
+	AuthorizationsURL = API_BASE_URL + "/authorizations"
+	EmailsURL         = API_BASE_URL + "/user/emails"
+	FollowersURL      = API_BASE_URL + "/user/followers"
+	FollowingURL      = API_BASE_URL + "/user/following"
+	GistsURL          = API_BASE_URL + "/gists"
+	PublicGistsURL    = API_BASE_URL + "/gists/public"
+	OrganizationURL   = func() string {
 		return fmt.Sprintf("/orgs/{org}")
 
 	}
@@ -62,15 +44,13 @@ var (
 		return fmt.Sprintf("/rate_limit")
 
 	}
-	RepositoryURL = func() string {
-		return fmt.Sprintf("/repos/{owner}/{repo}")
+	RepositoryURL = func(user, repo string) string {
+		return fmt.Sprintf("%s/repos/%s/%s", API_BASE_URL, user, repo)
 
 	}
 
-	CurrentUserRepositoriesURL = func() string {
-		return fmt.Sprintf("/user/repos{?type,page,per_page,sort")
+	CurrentUserRepositoriesURL = API_BASE_URL + "/user/repos"
 
-	}
 	StarredURL = func() string {
 		return fmt.Sprintf("/user/starred{/owner}{/repo")
 
@@ -83,12 +63,13 @@ var (
 		return fmt.Sprintf("/users/{user}")
 
 	}
-	UserOrganizationsURL = func() string {
-		return fmt.Sprintf("/user/orgs")
+	UserOrganizationsURL = API_BASE_URL + "/user/orgs"
+
+	UserRepositoriesURL = func(username, repoType string, per_page int) string {
+		return fmt.Sprintf("/users/%s/repos?type=%s&per_page=%d", username, repoType, per_page)
 
 	}
-	UserRepositoriesURL = func() string {
-		return fmt.Sprintf("/users/{user}/repos{?type,page,per_page,sort}")
-
+	TrendingRepoURL = func(lang string) string {
+		return fmt.Sprintf("%s/search/repositories?q=language:%s+sort:stars", API_BASE_URL, lang)
 	}
 )
