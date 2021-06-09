@@ -15,6 +15,7 @@ Checklist
 > Important
 
 - [ ] Testcases
+- [ ] Makefile
 
 #### Installation Instruction
 
