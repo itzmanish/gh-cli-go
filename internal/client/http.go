@@ -35,7 +35,7 @@ func NewClient(timeout time.Duration) *http.Client {
 	return Client
 }
 
-func NewRequest(url string) ([]byte, error) {
+func NewRequestWithAuthentication(url string) ([]byte, error) {
 	username := viper.Get("gh_username")
 	token := viper.Get("gh_token")
 	httpClient := NewClient(5 * time.Second)
