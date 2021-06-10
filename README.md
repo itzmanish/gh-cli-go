@@ -1,6 +1,8 @@
 # gh-cli-go
 
 A github cli app for retrieving and downloading user info to local filesystem.
+It also have a superb game you surely want to play with.
+Check that out with `gh-cli-go play` or do `gh-cli-go help` for more information.
 
 [![Go](https://github.com/itzmanish/gh-cli-go/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/itzmanish/gh-cli-go/actions/workflows/go.yml)
 [![codecov](https://codecov.io/gh/itzmanish/gh-cli-go/branch/master/graph/badge.svg?token=RDWK10DQYI)](https://codecov.io/gh/itzmanish/gh-cli-go)
