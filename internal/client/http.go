@@ -26,13 +26,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Client = http.DefaultClient
-
 func NewClient(timeout time.Duration) *http.Client {
-	Client = &http.Client{
+	return &http.Client{
 		Timeout: timeout,
 	}
-	return Client
 }
 
 func NewRequestWithAuthentication(url string) ([]byte, error) {

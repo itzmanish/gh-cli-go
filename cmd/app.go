@@ -20,10 +20,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/itzmanish/gh-cli-go/internal"
@@ -72,11 +72,11 @@ var app = &cli.App{
 		return cli.ShowAppHelp(c)
 	},
 	Before: func(c *cli.Context) error {
-		base_dir, err := os.UserHomeDir()
+		config_dir, err := os.UserConfigDir()
 		if err != nil {
 			return err
 		}
-		internal.LoadConfig(base_dir + "/.config")
+		internal.LoadConfig(config_dir)
 		username := viper.Get("gh_username")
 		token := viper.Get("gh_token")
 		if username == nil || token == nil {
@@ -149,22 +149,22 @@ func Run(args []string) (err error) {
 }
 
 func initApp() error {
-	username, err := utils.PromptText("username", true)
+	var username, password string
+	fmt.Println("Enter github username: ")
+	_, err := fmt.Scan(&username)
 	if err != nil {
 		return err
 	}
-	password, err := utils.PromptTextMasked("Token/Password", true)
+	fmt.Println("Enter github token/password (github token is preffered): ")
+	_, err = fmt.Scan(&password)
 	if err != nil {
 		return err
 	}
-	viper.Set("gh_username", username)
-	viper.Set("gh_token", password)
-	base_dir, err := os.UserHomeDir()
-	if err != nil {
-		return err
+	data := map[string]interface{}{
+		"gh_username": username,
+		"gh_token":    password,
 	}
-	err = viper.WriteConfigAs(base_dir + "/.config/.gh-cli.yaml")
-	if err != nil {
+	if err := internal.SetConfig(data, ".gh-cli.yaml", ""); err != nil {
 		return err
 	}
 	fmt.Println("gh-cli successfully initialized.")
@@ -216,30 +216,14 @@ func GuessTheStar(c *cli.Context) error {
 	  repository will presented to you which uses the language you specified.
 	============================================================
 	`)
-	resp, err := utils.PromptText("If you are agreed enter YES/yes/Y/y, anything else will be considered as NO", false)
-	if err != nil {
-		return err
-	}
-	if resp == "YES" || resp == "yes" || resp == "Y" || resp == "y" {
-		return StartGame(c.String("language"))
-	}
-	fmt.Println("You have quit the game")
-	return nil
+
+	return StartGame(c.String("language"))
 }
 
 func StartGame(lang string) error {
 	score := 0
 	fmt.Printf("\nLoading repositories")
-	req, err := http.NewRequest("GET", client.TrendingRepoURL(lang), nil)
-	if err != nil {
-		return err
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	repositories := Repositories{}
-	err = json.NewDecoder(res.Body).Decode(&repositories)
+	repositories, err := getRepositories(lang)
 	if err != nil {
 		return err
 	}
@@ -249,17 +233,16 @@ func StartGame(lang string) error {
 		repo := repositories.Items[rand.Intn(100-0+1)+0]
 		fmt.Println("Repository Name: ", repo.Name)
 		fmt.Println("Repository Full Name: ", repo.FullName)
-		fmt.Println("Repository url: ", repo.HtmlURL)
 		fmt.Println("Repository language: ", repo.Language)
-		gvalue, err := utils.PromptText("Guess the star", true)
+		fmt.Println(repo.Stars)
+		fmt.Println("Guess the total number of star or this repo: ")
+		var gvalue int
+		_, err := fmt.Scan(&gvalue)
 		if err != nil {
 			return err
 		}
-		v, err := strconv.Atoi(gvalue)
-		if err != nil {
-			return err
-		}
-		if CheckIfCorrect(v, repo.Stars) {
+		fmt.Println(gvalue)
+		if CheckIfCorrect(gvalue, repo.Stars) {
 			score = score + 1
 		} else {
 			fmt.Printf("\nWrong answer\n")
@@ -276,10 +259,24 @@ func StartGame(lang string) error {
 }
 
 func CheckIfCorrect(v int, star int) bool {
-	starH := float64(star) + float64(star)*0.01
-	starL := float64(star) - float64(star)*0.01
-	if float64(v) >= starL && float64(v) <= starH {
+	starH := float64(star) + float64(star)*0.1
+	starL := float64(star) - float64(star)*0.1
+	if math.Abs(float64(v)) >= starL && math.Abs(float64(v)) <= starH {
 		return true
 	}
 	return false
+}
+
+func getRepositories(lang string) (*Repositories, error) {
+	req, err := http.NewRequest("GET", client.TrendingRepoURL(lang), nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	repositories := Repositories{}
+	err = json.NewDecoder(res.Body).Decode(&repositories)
+	return &repositories, err
 }
