@@ -1,18 +1,3 @@
-/*
-Copyright © 2021 Manish itzmanish108@gmail.com
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -33,12 +18,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// Response hold response, name for response and error
 type Response struct {
 	Name     string
 	Response []byte
 	Error    error
 }
 
+// Repository defines structure of repo in github response
 type Repository struct {
 	Id       int    `json:"id"`
 	NodeId   string `json:"node_id"`
@@ -49,11 +36,11 @@ type Repository struct {
 	Stars    int    `json:"stargazers_count"`
 }
 
+//Respositories defines items which holds array of repository
 type Repositories struct {
 	Items []Repository `json:"items"`
 }
 
-// rootCmd represents the base command when called without any subcommands
 var app = &cli.App{
 	Name:     "gh-cli-go",
 	Usage:    "A Github CLI which provides downloading users data from github.",
@@ -104,7 +91,7 @@ var app = &cli.App{
 				},
 			},
 			Action: func(c *cli.Context) error {
-				return GetAllInfos(c, true)
+				return getAllInfos(c, true)
 			},
 		},
 		{
@@ -112,7 +99,7 @@ var app = &cli.App{
 			Usage: "show all information available for initialized user",
 
 			Action: func(c *cli.Context) error {
-				return GetAllInfos(c, false)
+				return getAllInfos(c, false)
 			},
 		},
 		{
@@ -126,7 +113,7 @@ var app = &cli.App{
 				},
 			},
 			Action: func(c *cli.Context) error {
-				return GuessTheStar(c)
+				return guessTheStar(c)
 			},
 		},
 	},
@@ -136,6 +123,7 @@ func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
+// Run runs the app cli program
 func Run(args []string) (err error) {
 	cli.VersionFlag = &cli.BoolFlag{
 		Name:    "version",
@@ -171,7 +159,7 @@ func initApp() error {
 	return nil
 }
 
-func GetAllInfos(c *cli.Context, download bool) error {
+func getAllInfos(c *cli.Context, download bool) error {
 	resCh := make(chan Response, len(client.Urls))
 	for name, url := range client.Urls {
 		go func(c chan Response, name string, url string) {
@@ -204,7 +192,7 @@ func GetAllInfos(c *cli.Context, download bool) error {
 	return nil
 }
 
-func GuessTheStar(c *cli.Context) error {
+func guessTheStar(c *cli.Context) error {
 	fmt.Println(`
 	Hi, Welcome to the guess the star game.
 	Before starting Here is the guide to play the game -
@@ -217,10 +205,10 @@ func GuessTheStar(c *cli.Context) error {
 	============================================================
 	`)
 
-	return StartGame(c.String("language"))
+	return startGame(c.String("language"))
 }
 
-func StartGame(lang string) error {
+func startGame(lang string) error {
 	score := 0
 	fmt.Printf("\nLoading repositories")
 	repositories, err := getRepositories(lang)
@@ -242,7 +230,7 @@ func StartGame(lang string) error {
 			return err
 		}
 		fmt.Println(gvalue)
-		if CheckIfCorrect(gvalue, repo.Stars) {
+		if checkIfCorrect(gvalue, repo.Stars) {
 			score = score + 1
 		} else {
 			fmt.Printf("\nWrong answer\n")
@@ -258,7 +246,7 @@ func StartGame(lang string) error {
 	return nil
 }
 
-func CheckIfCorrect(v int, star int) bool {
+func checkIfCorrect(v int, star int) bool {
 	starH := float64(star) + float64(star)*0.1
 	starL := float64(star) - float64(star)*0.1
 	if math.Abs(float64(v)) >= starL && math.Abs(float64(v)) <= starH {

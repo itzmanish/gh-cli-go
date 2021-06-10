@@ -12,12 +12,12 @@ import (
 func TestCheckIfCorrect(t *testing.T) {
 	inp1 := 500
 	inp2 := 420
-	if CheckIfCorrect(inp1, inp2) {
+	if checkIfCorrect(inp1, inp2) {
 		t.Error("expected false but got true")
 	}
 	inp3 := 500
 	inp4 := 510
-	if !CheckIfCorrect(inp3, inp4) {
+	if !checkIfCorrect(inp3, inp4) {
 		t.Errorf("%d is matched with %d with 10%% tolerence but got false", inp3, inp4)
 	}
 }
@@ -122,7 +122,7 @@ func TestGetAllInfos(t *testing.T) {
 				t.Errorf("Unexpected error: %v", err)
 			}
 			ctx := cli.NewContext(app, &flag.FlagSet{}, nil)
-			err = GetAllInfos(ctx, test.download)
+			err = getAllInfos(ctx, test.download)
 			if err != nil && !test.errExpected {
 				t.Errorf("Expected no error but got: %v", err)
 				return
@@ -159,7 +159,7 @@ func TestStartGame(t *testing.T) {
 	}
 	os.Stdin = tmpfile
 
-	err = StartGame("go")
+	err = startGame("go")
 	if err != nil {
 		t.Error(err)
 	}

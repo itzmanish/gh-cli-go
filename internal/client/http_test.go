@@ -9,7 +9,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 	timeout := time.Second * 5
-	c := NewClient(timeout)
+	c := newClient(timeout)
 	if c == nil {
 		t.Error("Expected client but got nil")
 	}

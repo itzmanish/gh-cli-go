@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// LoadConfig loads config from given path
 func LoadConfig(path string) error {
 	viper.AddConfigPath(path)
 	viper.SetConfigName(".gh-cli")
@@ -14,6 +15,7 @@ func LoadConfig(path string) error {
 	return viper.ReadInConfig()
 }
 
+// SetConfig sets given data to given path and filename
 func SetConfig(data map[string]interface{}, filename string, path string) error {
 	for k, v := range data {
 		viper.Set(k, v)

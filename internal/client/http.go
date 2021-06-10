@@ -26,16 +26,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewClient(timeout time.Duration) *http.Client {
+func newClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Timeout: timeout,
 	}
 }
 
+// NewRequestWithAuthentication do request with username and password in header to url
 func NewRequestWithAuthentication(url string) ([]byte, error) {
 	username := viper.Get("gh_username")
 	token := viper.Get("gh_token")
-	httpClient := NewClient(5 * time.Second)
+	httpClient := newClient(5 * time.Second)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

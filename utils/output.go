@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// Output prints the given data to given filename in given filepath
 func Output(data []byte, download bool, filename, filepath string) error {
 	if !download {
 		fmt.Println("++++++++++++++" + filename + "++++++++++++++++++")
@@ -34,6 +35,7 @@ func Output(data []byte, download bool, filename, filepath string) error {
 	return nil
 }
 
+// CreateFile creates filepath
 func CreateFile(p string) (*os.File, error) {
 	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
 		return nil, err
