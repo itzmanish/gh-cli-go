@@ -1,3 +1,5 @@
 .gh-cli.json
 .env
 out
+gh-cli-go
+cover.out
