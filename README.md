@@ -15,9 +15,6 @@ Checklist
 - [x] following
 - [x] stars
 - [x] Guess the star game
-
-> Important
-
 - [x] Testcases
 - [x] Makefile
 
