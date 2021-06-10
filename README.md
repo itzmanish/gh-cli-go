@@ -3,6 +3,8 @@
 A github cli app for retrieving and downloading user info to local filesystem.
 
 [![Go](https://github.com/itzmanish/gh-cli-go/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/itzmanish/gh-cli-go/actions/workflows/go.yml)
+[![codecov](https://codecov.io/gh/itzmanish/gh-cli-go/branch/master/graph/badge.svg?token=RDWK10DQYI)](https://codecov.io/gh/itzmanish/gh-cli-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/itzmanish/gh-cli-go)](https://goreportcard.com/report/github.com/itzmanish/gh-cli-go)
 
 Checklist
 
